@@ -17,34 +17,44 @@ namespace StoreClients
                 DataSource = @"(localdb)\MSSQLLocalDB",
                 InitialCatalog = "CustomersMSSQLLocalDB",
                 IntegratedSecurity = true,
-                Pooling = true,
-                UserID = "Admin",
-                Password = "Pass123"                
+                Pooling = true
             };
-       
+
             OleDbConnectionStringBuilder AccessConStr = new OleDbConnectionStringBuilder()
             {
                 DataSource = "ProductsMSAccess.accdb",
                 Provider = "Microsoft.ACE.OLEDB.12.0",
-                PersistSecurityInfo = true,
-                
+                PersistSecurityInfo = true
             };
 
-            using (SqlConnection sqlConnection = new SqlConnection(SQLConStr.ConnectionString))
-            {
-                try
-                {
-                    sqlConnection.Open();
-                }
-                catch (Exception e)
-                {
+            SqlConnection sqlConnection = new SqlConnection(SQLConStr.ConnectionString);
 
-                }
+            try
+            {
+                sqlConnection.Open();
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                sqlConnection.Close();
             }
 
-            using (OleDbConnection oleDbConnection = new OleDbConnection(AccessConStr.ConnectionString))
-            { 
 
+            OleDbConnection oleDbConnection = new OleDbConnection(AccessConStr.ConnectionString);
+            try
+            {
+                oleDbConnection.Open();
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                oleDbConnection.Close();
             }
         }
     }
