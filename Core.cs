@@ -5,57 +5,77 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data.OleDb;
+using System.Threading;
+using System.Windows;
+using System.Data;
 
 namespace StoreClients
 {
     class Core
     {
-        public void Main()
+        SqlConnectionStringBuilder SQLConStr = new SqlConnectionStringBuilder()
         {
-            SqlConnectionStringBuilder SQLConStr = new SqlConnectionStringBuilder()
-            {
-                DataSource = @"(localdb)\MSSQLLocalDB",
-                InitialCatalog = "CustomersMSSQLLocalDB",
-                IntegratedSecurity = true,
-                Pooling = true
-            };
+            DataSource = @"(localdb)\MSSQLLocalDB",
+            InitialCatalog = "CustomersMSSQLLocalDB",
+            IntegratedSecurity = true,
+            Pooling = true
+        };
 
-            OleDbConnectionStringBuilder AccessConStr = new OleDbConnectionStringBuilder()
+        OleDbConnectionStringBuilder AccessConStr = new OleDbConnectionStringBuilder()
+        {
+            DataSource = "ProductsMSAccess.accdb",
+            Provider = "Microsoft.ACE.OLEDB.12.0",
+            PersistSecurityInfo = true
+        };
+        public void Initial()
+        {
+           
+            Thread SQLConnectThread = new Thread(() =>
             {
-                DataSource = "ProductsMSAccess.accdb",
-                Provider = "Microsoft.ACE.OLEDB.12.0",
-                PersistSecurityInfo = true
-            };
+                ReadFromClientsSQLDB();
+            });
 
-            SqlConnection sqlConnection = new SqlConnection(SQLConStr.ConnectionString);
-
-            try
+           /* Thread OleConnectThread = new Thread(() =>
             {
-                sqlConnection.Open();
+
+                using (OleDbConnection oleDbConnection = new OleDbConnection(AccessConStr.ConnectionString))
+                    try
+                    {
+                        oleDbConnection.Open();
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message, "Невозможно подключиться к базе данных товаров!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+            });*/
+
+            SQLConnectThread.Start();
+            //OleConnectThread.Start();
+        }
+        public DataTable ReadFromClientsSQLDB()
+        {
+            DataTable dataTable = new DataTable();
+            using (SqlConnection connection = new SqlConnection(SQLConStr.ConnectionString))
+            {
+                try
+                {
+                    connection.Open();
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message, "Невозможно подключиться к базе данных клиентов!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                string query = "SELECT * FROM Customers";
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(query, connection))
+                {                    
+                    dataAdapter.Fill(dataTable);
+                }
             }
-            catch (Exception e)
-            {
+            return dataTable;
+        }
+        public void AddClientToClientsSQLDB()
+        {
 
-            }
-            finally
-            {
-                sqlConnection.Close();
-            }
-
-
-            OleDbConnection oleDbConnection = new OleDbConnection(AccessConStr.ConnectionString);
-            try
-            {
-                oleDbConnection.Open();
-            }
-            catch (Exception e)
-            {
-
-            }
-            finally
-            {
-                oleDbConnection.Close();
-            }
         }
     }
 }

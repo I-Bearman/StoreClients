@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ using System.Windows.Shapes;
 
 namespace StoreClients
 {
+    
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
@@ -23,6 +25,11 @@ namespace StoreClients
         public MainWindow()
         {
             InitializeComponent();
+            Core core = new Core();
+            core.Initial();
+            DataTable dataTable = core.ReadFromClientsSQLDB();
+            ClientListDG.DataContext = dataTable;
+            ClientListDG.Items.Refresh();
         }
     }
 }
